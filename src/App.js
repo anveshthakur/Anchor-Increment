@@ -1,6 +1,6 @@
 import './App.css';
 import { useState } from 'react';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
 import {
   Program,
   web3,
@@ -8,8 +8,8 @@ import {
 } from '@project-serum/anchor';
 import idl from './idl.json';
 import { getPhantomWallet } from '@solana/wallet-adapter-wallets';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { useWallet, ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
+import { WalletMultiButton, WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 
 //wallets
 const wallets = [
@@ -29,6 +29,8 @@ const opts = {
 //getting the programId from the idl.json
 const programID = new PublicKey(idl.metadata.address);
 
+ const network = clusterApiUrl('devnet');
+
 const App = () => {
 
   const[value, setValue] = useState(null);
@@ -39,7 +41,6 @@ const App = () => {
   const getProvider = async() => {
 
     //establishing a connection to local
-    const network = "http://127.0.0.1:8899";
     const connection = new Connection(network, opts.preflightCommitment);
 
     //creating a provider using serum
@@ -68,7 +69,7 @@ const App = () => {
         console.log('account: ', account);
         setValue(account.count.toString());
       } catch(err){
-        console.log("Transaction Error: ", error);
+        console.log("Transaction Error: ", err);
       }
     }
 
@@ -118,7 +119,7 @@ const App = () => {
 }
 
 const AppWithProvider = () => (
-  <ConnectionProvider endpoint="http://127.0.0.1:8899">
+  <ConnectionProvider endpoint={network}>
     <WalletProvider wallets={wallets} autoConnect>
       <WalletModalProvider>
         <App />
@@ -127,4 +128,4 @@ const AppWithProvider = () => (
   </ConnectionProvider>
 )
 
-export default App;
+export default AppWithProvider;
